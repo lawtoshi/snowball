@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Debt Snowball Calculator: Find the fast way out of debt.">
+
+  <!-- Open Graph meta tags for social media sharing -->
+  <meta property="og:title" content="Debt Snowball Calculator">
+  <meta property="og:description" content="Add your loans, sort payoff by interest rate or balance.">
+  <meta property="og:image" content="https://snowball.lawtoshi.xyz/social-card-snowball.png">
+  <meta property="og:url" content="https://snowball.lawtoshi.xyz">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card meta tags for Twitter sharing -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Debt Snowball Calculator">
+  <meta name="twitter:description" content="Add your loans, sort payoff by interest rate or balance.">
+  <meta name="twitter:image" content="https://snowball.lawtoshi.xyz/social-card-snowball.png">
+
+  <link rel="icon" type="image/png" href="summerpunk24.png">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@400;600&display=swap" rel="stylesheet">
+  <title>Debt Snowball Calculator</title>
+  <style>
+      body {
+          font-family: 'Montserrat', sans-serif;
+          margin: 20px;
+          max-width: 700px;
+          margin: auto;
+          background-color: #000000; /* Black background */
+          color: #ffffff; /* White text */
+      }
+
+      p, h1 {
+          text-align: center;
+          max-width: 800px;
+          color: #ffffff; /* White text */
+      }
+
+      .loan-input {
+          margin-bottom: 10px;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+      }
+
+      label {
+          display: inline-block;
+          width: 100px;
+          margin-bottom: 5px;
+          color: #ffffff; /* White text */
+      }
+
+      input[type="text"], input[type="number"], select {
+          padding: 10px;
+          border: 1px solid #555555; /* Darker border */
+          border-radius: 5px;
+          height: 40px;
+          font-size: 16px;
+          font-family: 'Montserrat', sans-serif;
+          flex: 1;
+          min-width: 100px; /* Ensure a minimum width */
+          max-width: calc(100% - 110px); /* Adjust based on label width */
+          box-sizing: border-box; /* Include padding and border in width calculation */
+          background-color: #333333; /* Dark background for inputs */
+          color: #ffffff; /* White text for inputs */
+      }
+
+      select {
+          height: 50px;
+      }
+
+      input[type="submit"], #addLoan, #Calculate {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          background-color: #4CAF50;
+          color: white;
+          font-size: 16px;
+          cursor: pointer;
+          font-family: 'Montserrat', sans-serif;
+      }
+
+      input[type="submit"]:hover, #addLoan:hover, #Calculate:hover {
+          background-color: #45a049;
+          font-family: 'Montserrat', sans-serif;
+      }
+
+      #summaryTable {
+          margin-top: 20px;
+          border-collapse: collapse;
+          width: 100%;
+      }
+
+      #summaryTable th, #summaryTable td {
+          border: 1px solid #ddd;
+          padding: 8px;
+      }
+
+      #summaryTable td {
+          font-family: 'Oxygen', sans-serif;
+          background-color: #222222; /* Dark background for table cells */
+          color: #ffffff; /* White text for table cells */
+      }
+
+      #summaryTable th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: left;
+          background-color: #333333; /* Darker background for table headers */
+          color: #ffffff; /* White text for table headers */
+      }
+
+      .svg-icon {
+          height: 25px; /* Adjust the size of the icon as needed */
+          width: 25px; /* Adjust the size of the icon as needed */
+          margin-right: 8px; /* Add some space between the icon and the text */
+          vertical-align: middle;
+      }
+
+      .circular-image {
+          object-fit: cover;
+          border-radius: 50%;
+          clip-path: circle(50% at 50% 50%);
+      }
+
+      @media (max-width: 400px) {
+          label {
+              width: 100%;
+          }
+
+          input[type="text"], input[type="number"], select {
+              width: 100%;
+              max-width: 100%;
+              margin-right: 0;
+          }
+
+          .loan-input {
+              flex-direction: column;
+              align-items: stretch;
+          }
+      }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Debt Snowball Calculator</h1>
+        <p>Created by <img src="summerpunk.png" alt="Icon" class="svg-icon circular-image" /><a href="https://lawtoshi.xyz" class="styled-btn">Lawtoshi</a></p>
+        <form id="debtForm">
+            <div id="loansContainer">
+                <div class="loan-input">
+                    <label for="loan1">Loan 1:</label>
+                    <input type="text" id="name1" placeholder="Loan Name" required>
+                    <input type="number" id="balance1" placeholder="Balance" required>
+                    <input type="number" id="interest1" step="0.01" placeholder="Rate (%)" required>
+                    <input type="number" id="minPayment1" placeholder="Payment" required>
+                </div>
+            </div>
+            <button type="button" id="addLoan">Add Another Loan</button>
+            <br><br>
+            <label for="extraPayment">Extra Payment Amount:</label>
+            <input type="number" id="extraPayment" placeholder="Extra" required>
+            <br><br>
+            <label for="payoffOrder">Payoff Order:</label>
+            <select id="payoffOrder" required>
+                <option value="lowestBalance">Lowest Balance First</option>
+                <option value="highestInterest">Highest Interest First</option>
+            </select>
+            <br><br>
+            <button type="submit" id="Calculate">Calculate</button>
+        </form>
+        <canvas id="debtChart"></canvas>
+        <table id="summaryTable">
+            <thead>
+                <tr>
+                    <th>Loan</th>
+                    <th>Interest Paid</th>
+                    <th>Total Paid</th>
+                    <th>Payoff Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Total</th>
+                    <th id="totalInterestPaid"></th>
+                    <th id="totalPaid"></th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let loanCount = 1;
+        let debtChart;
+
+        document.getElementById('addLoan').addEventListener('click', () => {
+            loanCount++;
+            const loanInput = document.createElement('div');
+            loanInput.className = 'loan-input';
+            loanInput.innerHTML = `
+                <label for="loan${loanCount}">Loan ${loanCount}:</label>
+                <input type="text" id="name${loanCount}" placeholder="Loan Name" required>
+                <input type="number" id="balance${loanCount}" placeholder="Balance" required>
+                <input type="number" id="interest${loanCount}" step="0.01" placeholder="Rate (%)" required>
+                <input type="number" id="minPayment${loanCount}" placeholder="Payment" required>
+            `;
+            document.getElementById('loansContainer').appendChild(loanInput);
+        });
+
+        document.getElementById('debtForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            calculateDebtSnowball();
+        });
+
+        function allPreviousLoansPaidOff(loans, currentIndex) {
+            for (let i = 0; i < currentIndex; i++) {
+                if (loans[i].balance > 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function calculateDebtSnowball() {
+            let loans = [];
+            for (let i = 1; i <= loanCount; i++) {
+                const name = document.getElementById(`name${i}`).value;
+                const balance = parseFloat(document.getElementById(`balance${i}`).value);
+                const interest = parseFloat(document.getElementById(`interest${i}`).value) / 100;
+                const minPayment = parseFloat(document.getElementById(`minPayment${i}`).value);
+                loans.push({ id: i, name, balance, interest, minPayment, history: [], totalInterest: 0, totalPaid: 0, paidOff: false });
+            }
+            const extraPayment = parseFloat(document.getElementById('extraPayment').value);
+            const payoffOrder = document.getElementById('payoffOrder').value;
+
+            const currentDate = new Date();
+            let totalExtraPayment = extraPayment;
+
+            while (loans.some(loan => loan.balance > 0)) {
+                loans.sort((a, b) => {
+                    if (payoffOrder === 'lowestBalance') {
+                        return a.balance - b.balance;
+                    } else {
+                        return b.interest - a.interest;
+                    }
+                });
+
+                let remainingExtraPayment = totalExtraPayment;
+
+                loans.forEach((loan, index) => {
+                    if (loan.balance > 0) {
+                        const interestForMonth = loan.balance * loan.interest / 12;
+                        let payment = loan.minPayment;
+
+                        if (index === 0 || allPreviousLoansPaidOff(loans, index)) {
+                            payment += remainingExtraPayment;
+                            remainingExtraPayment = 0;
+                        }
+
+                        loan.totalInterest += interestForMonth;
+                        loan.balance = loan.balance + interestForMonth - payment;
+                        loan.totalPaid += payment;
+
+                        if (loan.balance < 0) {
+                            remainingExtraPayment = -loan.balance;
+                            loan.totalPaid += loan.balance;
+                            loan.balance = 0;
+                        }
+
+                        loan.history.push({
+                            month: currentDate.getMonth(),
+                            year: currentDate.getFullYear(),
+                            balance: loan.balance
+                        });
+
+                        console.log(`Loan "${loan.name}" updated. Balance: ${loan.balance.toFixed(2)}, Total Paid: ${loan.totalPaid.toFixed(2)}, Total Interest: ${loan.totalInterest.toFixed(2)}`);
+                    }
+                });
+
+                const paidOffLoans = loans.filter(loan => loan.balance === 0 && !loan.paidOff);
+                paidOffLoans.forEach(loan => {
+                    loan.paidOff = true;
+                    const payoffDate = new Date(currentDate);
+                    payoffDate.setMonth(currentDate.getMonth());
+                    loan.payoffDate = payoffDate.toLocaleDateString();
+                    totalExtraPayment += loan.minPayment;
+                    console.log(`Loan "${loan.name}" paid off. Extra payment now: ${totalExtraPayment}`);
+                });
+
+                loans = loans.filter(loan => loan.balance > 0 || loan.paidOff);
+
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+
+            const summary = loans.filter(loan => loan.paidOff).map(loan => ({
+                id: loan.id,
+                name: loan.name,
+                interestPaid: loan.totalInterest,
+                totalPaid: loan.totalPaid,
+                payoffDate: loan.payoffDate
+            }));
+
+            console.log("Loans: ", loans);
+            console.log("Summary: ", summary);
+            displayResults(loans, summary);
+        }
+
+        function displayResults(loans, summary) {
+            const ctx = document.getElementById('debtChart').getContext('2d');
+
+            if (debtChart) {
+                debtChart.destroy();
+            }
+
+            const colors = [
+                'rgba(255, 0, 0, 1)', // Red
+                'rgba(255, 165, 0, 1)', // Orange
+                'rgba(255, 255, 0, 1)', // Yellow
+                'rgba(0, 128, 0, 1)', // Green
+                'rgba(0, 0, 255, 1)', // Blue
+                'rgba(75, 0, 130, 1)', // Indigo
+                'rgba(238, 130, 238, 1)' // Violet
+            ];
+
+            while (colors.length < loans.length) {
+                const lastColor = colors[colors.length - 1];
+                const newColor = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`;
+                colors.push(newColor);
+            }
+
+            const datasets = loans.map((loan, index) => ({
+                label: loan.name,
+                data: loan.history.map(h => ({ x: new Date(h.year, h.month), y: h.balance })),
+                borderColor: colors[index],
+                backgroundColor: 'rgba(0, 0, 0, 0)',
+                fill: false,
+                tension: 0.4,
+            }));
+
+            console.log("Datasets for chart: ", datasets);
+
+            debtChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'month',
+                                tooltipFormat: 'MM/yyyy',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Balance'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const summaryTableBody = document.getElementById('summaryTable').querySelector('tbody');
+            summaryTableBody.innerHTML = '';
+            summary.forEach(s => {
+                const row = summaryTableBody.insertRow();
+                row.insertCell(0).innerText = s.name;
+                row.insertCell(1).innerText = formatCurrency(s.interestPaid);
+                row.insertCell(2).innerText = formatCurrency(s.totalPaid);
+                row.insertCell(3).innerText = s.payoffDate;
+            });
+
+            const totalInterestPaid = summary.reduce((sum, loan) => sum + loan.interestPaid, 0);
+            const totalPaid = summary.reduce((sum, loan) => sum + loan.totalPaid, 0);
+
+            document.getElementById('totalInterestPaid').innerText = formatCurrency(totalInterestPaid);
+            document.getElementById('totalPaid').innerText = formatCurrency(totalPaid);
+        }
+
+        function formatCurrency(amount) {
+            return `$${amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+        }
+    });
+    </script>
+</body>
+</html>
